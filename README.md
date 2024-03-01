@@ -182,7 +182,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 > sudo vi /etc/rc.local
 >> ...
 >>
->> /home/pi/start-batman-adv.sh &
+>> /home/**USERNAME**/start-batman-adv.sh &
 >>
 >> ...
 >
