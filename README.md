@@ -17,7 +17,7 @@
 * Check SD Card(disk) size
 > df -h
 * Modify swap size by accessing dphs-swapfile
-> vi /etc/dphys-swapfile
+> sudo vi /etc/dphys-swapfile
 >> ...
 >>
 >> CONF_SWAPFILE=/home/pi &nbsp;&nbsp;&nbsp; #location of swap file
@@ -40,7 +40,7 @@
 
 ## 4. Setup for Wifi Connection, LAN Card Drivers
 * Fixed IP Settings for convenience in ssh remote access
-> vi /etc/dhcpcd.conf
+> sudo vi /etc/dhcpcd.conf
 >> ...
 >>
 >> interface wlan0
@@ -84,7 +84,7 @@ reference: https://github.com/binnes/WiFiMeshRaspberryPi/blob/master/part1/READM
 * i. WLAN Interface Settings
 
 i-(1). Change the wlan0 interface mode into Ad-Hoc
-> vi /etc/network/interfaces.d/wlan0
+> sudo vi /etc/network/interfaces.d/wlan0
 >> auto wlan0
 >> 
 >> iface wlan0 inet manual
