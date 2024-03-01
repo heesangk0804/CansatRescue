@@ -201,3 +201,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 > sudo batctl n &nbsp;&nbsp;&nbsp; #check external IP devices(nodes) in mesh network
 > 
 > sudo batctl if &nbsp;&nbsp;&nbsp; #check mesh network active
+>
+> netstat -r  &nbsp;&nbsp;&nbsp; #configure gateway ip address
+>
+> route  &nbsp;&nbsp;&nbsp; #configure gateway ip address
