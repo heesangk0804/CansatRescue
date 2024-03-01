@@ -113,6 +113,7 @@ i-(3). Make gateway server to dynamically allocate IP to its clients
 
 ii-(1). Set 'batman-adv' kernel driver module to be loaded every time the system boots
 > echo 'batman-adv' | sudo tee --append /etc/modules
+>
 > lsmod &nbsp;&nbsp;&nbsp; #check if batman module properly added
 
 ii-(2). Install batctl utility to control batman-adv
