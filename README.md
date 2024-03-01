@@ -120,6 +120,7 @@ ii-(2). Install batctl utility to control batman-adv
 >sudo apt install -y batctl
 
 * iii. Create & Run shell script exe program to run mesh network
+
 iii-(1). Write shell script file to run mesh network (node client version)
 > vi ~/start-batman-adv.sh
 >> #!/bin/bash
