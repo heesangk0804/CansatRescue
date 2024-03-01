@@ -186,7 +186,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >>
 >> ...
 >
-> sudo reboot -h now
+> sudo reboot
 
 
 * +Commands to check network connenction
