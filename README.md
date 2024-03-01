@@ -32,7 +32,7 @@
 : Install linux kernel header to add modules to kernel, perform system call, etc
 
 * Install kernel header if not
-> sudo apt install linux-kernel-headers
+> sudo apt install linux-headers
 * Check if kernel header successfully installed, with proper version
 > /usr/src $ ls
 > 
