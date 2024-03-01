@@ -45,9 +45,9 @@
 >>
 >> interface wlan0
 >>
->> static ip_address=192.168.**255.XX**/24 &nbsp;&nbsp;&nbsp; #fixed local IP address for Pi
+>> static ip_address=192.168.**252.XX**/24 &nbsp;&nbsp;&nbsp; #fixed local IP address for Pi
 >>  
->> static routers=192.168.**255.1**/24 &nbsp;&nbsp;&nbsp; #IP address of gateway server
+>> static routers=192.168.**252.1**/24 &nbsp;&nbsp;&nbsp; #IP address of gateway server
 >> 
 >> ...
 
