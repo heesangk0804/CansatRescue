@@ -40,6 +40,8 @@
 
 ## 4. Setup for Wifi Connection, LAN Card Drivers
 * Fixed IP Settings for convenience in ssh remote access
+> netstat -nr
+> 
 > sudo vi /etc/dhcpcd.conf
 >> ...
 >>
