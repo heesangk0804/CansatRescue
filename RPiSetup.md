@@ -81,6 +81,7 @@
 * Create shell script for camera control & streaming, then execute it every time the system boots
 > vi ~/start-libcamera-rtsp.sh
 >> #!/bin/bash
+>> 
 >> libcamera-vid -t 0 --inline -n -o - | cvlc -vvv stream:////dev/stdin --sout '#rtp{sdp=rtsp://:8080/}' :demux=h264
 >
 > sudo vi /etc/rc.local
