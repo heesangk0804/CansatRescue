@@ -77,6 +77,11 @@
 > sudo apt install libcamera-apps
 * install vlc for rtsp streaming the video
 > sudo apt install vlc
+* Create shell script that holds shell command for camcording and rtsp streaming using libcamera & vlc utility
+> vi ~/start-libcamera-rtsp.sh
+>> #!/bin/bash
+>> libcamera-vid -t 0 --inline -n -o - | cvlc -vvv stream:////dev/stdin --sout '#rtp{sdp=rtsp://:8080/}' :demux=h264
+
 
 ## 6. Setup for Ad-Hoc Mesh Network
 : adjusting WLAN interface settings, adding **'batman-adv'** driver module, running execution files to set up an ad-hoc mesh network
