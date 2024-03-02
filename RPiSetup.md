@@ -84,6 +84,8 @@
 >> 
 >> libcamera-vid -t 0 --inline -n -o - | cvlc -vvv stream:////dev/stdin --sout '#rtp{sdp=rtsp://:8080/}' :demux=h264
 >
+> chmod +x ~/start-libcamera-rtsp.sh
+>
 > sudo vi /etc/rc.local
 >> ...
 >>
