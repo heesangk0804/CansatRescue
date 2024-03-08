@@ -203,6 +203,17 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >
 > sudo reboot
 
+##7. Setup for Each Node to Create Wireless Access Point Server
+* Install & Enable hostapd package
+? sudo apt install hostapd
+>
+> sudo systemctl unmask hostapd
+>
+> sudo systemctl enable hostapd
+* (prepared through #7; DHCP package installation)
+> sudo apt install dnsmasq
+
+https://wikidocs.net/78532
 
 * +Commands to check network connenction
 > ifconfig  &nbsp;&nbsp;&nbsp; #configure ip address, packets of each interfaces
