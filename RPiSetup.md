@@ -93,7 +93,7 @@
 >>
 >> ...
 
-## 6. Setup for Ad-Hoc Mesh Network
+## 7. Setup for Ad-Hoc Mesh Network
 : adjusting WLAN interface settings, adding **'batman-adv'** driver module, running execution files to set up an ad-hoc mesh network
 
 reference: https://github.com/binnes/WiFiMeshRaspberryPi/blob/master/part1/README.md
@@ -203,7 +203,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >
 > sudo reboot
 
-##7. Setup for Each Node to Create Wireless Access Point Server
+## 8. Setup for Each Node to Create Wireless Access Point Server
 * Install & Enable hostapd package
 ? sudo apt install hostapd
 >
