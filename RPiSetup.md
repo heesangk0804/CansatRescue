@@ -230,7 +230,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >> dhcp-range=192.168.2.2,192.168.2.20,255.255.255.0,24h
 * Edit hostapd configuration file for WiFi AP Server basic settings:
 > sudo vi /etc/hostapd/hostapd.conf
->> interface=wlan0
+>> interface=wlan1
 >>
 >> driver=nl80211
 >>
@@ -257,7 +257,14 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >> wpa_pairwise=TKIP
 >>
 >> rsn_pairwise=CCMP
-
+* Edit hostapd to inform daemon with the hostapd.conf file
+> sudo vi /etc/default/hostapd
+>
+> DAEMON_CONF="/etc/hostapd/hostapd.conf"
+*
+>  sudo systemctl start hostapd
+>
+> sudo systemctl start dnsmasq
 
 https://wikidocs.net/78532
 
