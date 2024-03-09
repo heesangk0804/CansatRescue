@@ -261,10 +261,25 @@ iii-(2). Make the file executable, then let it run every time the system boots
 > sudo vi /etc/default/hostapd
 >
 > DAEMON_CONF="/etc/hostapd/hostapd.conf"
-*
->  sudo systemctl start hostapd
+* Reboot and start both daemon hostapd, dnsmasq
+> sudo reboot
+>
+> sudo systemctl start hostapd
 >
 > sudo systemctl start dnsmasq
+* Forwarding, Masking options: unnecessary for AP server
+>> #Enable port forwarding
+>>
+>> sudo sysctl -w net.ipv4.ip_forward=1
+>>
+>> sudo iptables -t nat -A POSTROUTING -o wlan1 -j MASQUERADE
+>>
+>> sudo iptables -A FORWARD -i wlan1 -o bat0 -m conntrack –ctstate RELATED,ESTABLISHED -j ACCEPT
+>>
+>> sudo iptables -A FORWARD -i bat0 -o wlan1 -j ACCEPT
+>>
+
+
 
 https://wikidocs.net/78532
 
