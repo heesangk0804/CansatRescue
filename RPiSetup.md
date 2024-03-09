@@ -204,16 +204,59 @@ iii-(2). Make the file executable, then let it run every time the system boots
 > sudo reboot
 
 ## 8. Setup for Each Node to Create Wireless Access Point Server
-* Install & Enable hostapd package
-? sudo apt install -y hostapd
+* Install hostapd package: Daemon for controlling Wi-Fi AP server
+? sudo apt install -y hostapd 
 >
 > sudo systemctl unmask hostapd
 >
-> sudo systemctl enable hostapd
-* (prepared through #7; DHCP package installation)
+* (prepared through #7) Install DHCP package: Daemon for dynamic IP allocation(DHCP) to clients 
 > sudo apt install -y dnsmasq
-> 
-> 
+* Temorarily stop hostapd&dnsmasq
+> sudo systemctl stop hostapd
+>
+> sudo systemctl stop dnsmasq
+* Edit dhcpcd configuration file
+> sudo vi /etc/dhcpcd.conf
+>> interface wlan0
+>>
+>> static ip_address=192.168.**(SatNum)**.1/24
+>>
+>> nohook wpa_supplicant
+> sudo service dhcpcd restart
+* Edit dnsmasq configuration file to set DHCP allocation
+> sudo vi /etc/dnsmasq.conf
+>> interface=wlan0
+>>
+>> dhcp-range=192.168.2.2,192.168.2.20,255.255.255.0,24h
+* Edit hostapd configuration file for WiFi AP Server basic settings:
+> sudo vi /etc/hostapd/hostapd.conf
+>> interface=wlan0
+>>
+>> driver=nl80211
+>>
+>> ssid=**(AP server name)**
+>>
+>> hw_mode=g
+>>
+>> channel=7
+>>
+>> wmm_enabled=0
+>>
+>> macaddr_acl=0
+>>
+>> auth_algs=1
+>>
+>> ignore_broadcast_ssid=0
+>>
+>> wpa=2
+>>
+>> wpa_passphrase=**(AP Server password)**
+>>
+>> wpa_key_mgmt=WPA-PSK
+>>
+>> wpa_pairwise=TKIP
+>>
+>> rsn_pairwise=CCMP
 
 
 https://wikidocs.net/78532
