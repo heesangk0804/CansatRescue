@@ -205,14 +205,14 @@ iii-(2). Make the file executable, then let it run every time the system boots
 
 ## 8. Setup for Each Node to Create Wireless Access Point Server
 * Install & Enable hostapd package
-? sudo apt install hostapd
+? sudo apt install -y hostapd
 >
 > sudo systemctl unmask hostapd
 >
 > sudo systemctl enable hostapd
 * (prepared through #7; DHCP package installation)
-> sudo apt install dnsmasq
->
+> sudo apt install -y dnsmasq
+> 
 > 
 
 
@@ -235,7 +235,7 @@ https://wikidocs.net/78532
 >
 > route  &nbsp;&nbsp;&nbsp; #configure gateway ip address
 >
-> nmap -sn **(your host IP)**/24   &nbsp;&nbsp;&nbsp; #configure all the hosts connected to local network
+> nmap -sn **(your host IP)**/24   &nbsp;&nbsp;&nbsp; #configure all the hosts' IPs connected to local network
 >> (Installation of nmap)
 >>
 >> sudo apt install snapd
