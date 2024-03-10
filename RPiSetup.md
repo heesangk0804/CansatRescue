@@ -310,11 +310,11 @@ https://wikidocs.net/78532
 > nmap -sn **(your host IP)**/24   &nbsp;&nbsp;&nbsp; #configure all the hosts' IPs connected to local network
 >> (Installation of nmap)
 >>
->> sudo apt install snapd
+>> sudo apt install -y snapd
 >>
 >> sudo reboot
 >>
->> sudo snap install core
+>> sudo snap install -y core
 >>
->> sudo snap install nmap
+>> sudo snap install -y nmap
 
