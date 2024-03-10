@@ -267,19 +267,21 @@ iii-(2). Make the file executable, then let it run every time the system boots
 > sudo systemctl start hostapd
 >
 > sudo systemctl start dnsmasq
-* Forwarding, Masking options: unnecessary for AP server
->> #Enable port forwarding
->>
+* Port Forwarding, Masking options (Unnecessary for AP server in this project)
+> vi ~/wifi-ap-forwarding.sh
 >> sudo sysctl -w net.ipv4.ip_forward=1
 >>
 >> sudo iptables -t nat -A POSTROUTING -o wlan1 -j MASQUERADE
 >>
->> sudo iptables -A FORWARD -i wlan1 -o bat0 -m conntrack –ctstate RELATED,ESTABLISHED -j ACCEPT
->>
->> sudo iptables -A FORWARD -i bat0 -o wlan1 -j ACCEPT
->>
-
-
+>> # sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
+> chmod +x ~/wifi-ap-forwarding.sh
+>
+> sudo vi /etc/rc.local
+>> ...
+>> /home/**USERNAME**/wifi-ap-forwarding.sh &
+>> #iptables-restore < /etc/iptables.ipv4.nat
+>> sudo systemctl start hostapd
+>> ...
 
 https://wikidocs.net/78532
 
