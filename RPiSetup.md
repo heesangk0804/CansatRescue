@@ -92,6 +92,18 @@
 >> su - **USERNAME** -c '/home/**USERNAME**/start-libcamera-rtsp.sh' &
 >>
 >> ...
+* libcamera commands for camera control
+> libcamera-hello  &nbsp;&nbsp;&nbsp; #starts the camera, displays a preview window
+>
+> libcamera-jpeg  &nbsp;&nbsp;&nbsp; #simple still image capture application with avoiding some of the additional features
+>
+> libcamera-still -o **(filename)**.jpg &nbsp;&nbsp;&nbsp; #still image capture application with supporting more of the legacy raspistill options
+>
+>  libcamera-still -t 5000 --datetime -n --timelapse 1000 &nbsp;&nbsp;&nbsp; #Continuous automatic photo taking, 1 shot per second within 5 seconds
+>
+> libcamera-still --help &nbsp;&nbsp;&nbsp; #Instructions for more features
+>
+> libcamera-vid &nbsp;&nbsp;&nbsp; #Video capture
 
 ## 7. Setup for Ad-Hoc Mesh Network
 : adjusting WLAN interface settings, adding **'batman-adv'** driver module, running execution files to set up an ad-hoc mesh network
