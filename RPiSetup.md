@@ -276,7 +276,8 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >> #sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
 >>
 > chmod +x ~/wifi-ap-forwarding.sh
-> sudo vi /etc/rc.local
+>
+>  sudo vi /etc/rc.local
 >> ...
 >> /home/**USERNAME**/wifi-ap-forwarding.sh &
 >> #iptables-restore < /etc/iptables.ipv4.nat
