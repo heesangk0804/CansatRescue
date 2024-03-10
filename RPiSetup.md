@@ -279,9 +279,13 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >
 >  sudo vi /etc/rc.local
 >> ...
+>> 
 >> /home/**USERNAME**/wifi-ap-forwarding.sh &
+>> 
 >> #iptables-restore < /etc/iptables.ipv4.nat
+>>
 >> sudo systemctl start hostapd
+>>
 >> ...
 
 https://wikidocs.net/78532
