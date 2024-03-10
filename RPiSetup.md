@@ -74,6 +74,8 @@
 
 ## 6. Setup for Camera Streaming
 : install libraries for camera control and streaming
+* Disable legacy camera setting from raspi-config, since libcamera library doesn't support it
+* 
 * install libcamera for camera control (unnecessary; already included in default packages
 > sudo apt install libcamera-apps
 * install vlc for rtsp streaming the video
@@ -101,9 +103,12 @@
 >
 >  libcamera-still -t 5000 --datetime -n --timelapse 1000 &nbsp;&nbsp;&nbsp; #Continuous automatic photo taking, 1 shot per second within 5 seconds
 >
-> libcamera-still --help &nbsp;&nbsp;&nbsp; #Instructions for more features
+> libcamera-vid -t 10000 -o **(filename)**.h264 &nbsp;&nbsp;&nbsp; #Video capture application by H.264 encoder; duration = 10000 ms
 >
-> libcamera-vid &nbsp;&nbsp;&nbsp; #Video capture
+> libcamera-raw -t 2000 -o **(filename)**.raw  &nbsp;&nbsp;&nbsp; #Video recording w/ raw Bayer frames directly from the sensor;no preview window
+>
+> libcamera-XXX --help &nbsp;&nbsp;&nbsp; #Instructions for more features
+>
 
 ## 7. Setup for Ad-Hoc Mesh Network
 : adjusting WLAN interface settings, adding **'batman-adv'** driver module, running execution files to set up an ad-hoc mesh network
