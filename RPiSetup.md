@@ -273,7 +273,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >>
 >> sudo iptables -t nat -A POSTROUTING -o wlan1 -j MASQUERADE
 >>
->> # sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
+>> #sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
 > chmod +x ~/wifi-ap-forwarding.sh
 >
 > sudo vi /etc/rc.local
