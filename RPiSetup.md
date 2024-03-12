@@ -8,15 +8,10 @@
 > sudo apt install vim
 >
 > sudo apt install python3
-* Find installed packages
-> rpm -qa | grep
+* List&find installed packages
+> apt list
 >
-> rpm -qa | more
->
-> yum list installed | grep
->
-> yum list installed | more
-
+> apt search **package_name**
 
 ## 2. Swap Memory Setting
 : Spare extra memory for RAM by swapping some from SD Card
