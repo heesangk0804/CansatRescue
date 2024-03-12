@@ -75,7 +75,7 @@
 >>
 >>   priority=**N**
 >>
->>   id_str=**"Network_ID"**
+>>   #id_str=**"Network_ID"**
 >>
 >> }
 
