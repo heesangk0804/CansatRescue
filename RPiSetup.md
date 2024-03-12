@@ -63,6 +63,30 @@
 > echo 'denyinterfaces wlan0' | sudo tee --append /etc/dhcpcd.conf
 > sudo ./install-driver.sh
 
+* Wifi Connection Setting through Terminal
+> sudo vi /etc/wpa_supplicant/wpa_supplicant.conf
+>> ...
+>>
+>> network={
+>>
+>>   ssid=**"WiFi_Network_Name"** 
+>>
+>>   psk=**"password"**    #key_mgmt=NONE  -> if no password
+>>
+>>   priority=**N**
+>>
+>>   id_str=**"Network_ID"**
+>>
+>> }
+
+network={
+    ssid="HomeTwoSSID"
+    psk="passwordTwo"
+    priority=2
+    id_str="homeTwo"
+}
+
+
 ## 5. Setup for Serial Communications
 : install libraries to control serial connected peripherals from python code
 * Install smbus for i2c control
