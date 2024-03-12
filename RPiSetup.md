@@ -9,7 +9,7 @@
 >
 > sudo apt install python3
 * List&find installed packages
-> apt list
+> apt list #--installed
 >
 > apt search **package_name**
 
