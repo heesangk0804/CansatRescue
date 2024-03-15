@@ -263,6 +263,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >> static ip_address=192.168.**(SatNum)**.1/24
 >>
 >> nohook wpa_supplicant
+>
 > sudo service dhcpcd restart
 * Edit dnsmasq configuration file to set DHCP allocation
 > sudo vi /etc/dnsmasq.conf
