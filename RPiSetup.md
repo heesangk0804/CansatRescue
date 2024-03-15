@@ -82,13 +82,9 @@
 >>   #id_str=**"Network_ID"**
 >>
 >> }
-
-network={
-    ssid="HomeTwoSSID"
-    psk="passwordTwo"
-    priority=2
-    id_str="homeTwo"
-}
+> sudo ifdown wlan1
+>
+> sudo ifup wlan1
 
 
 ## 5. Setup for Serial Communications
