@@ -250,7 +250,9 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >
 > sudo systemctl unmask hostapd
 >
-* (prepared through #7) Install DHCP package: Daemon for dynamic IP allocation(DHCP) to clients 
+* (prepared through #7) Install DHCP package: Daemon for dynamic IP allocation(DHCP) to clients
+
+(Dynamic IP allocation could be also done by isc-dhcp-server software instead of dnsmasq)
 > sudo apt install -y dnsmasq
 * Temorarily stop hostapd&dnsmasq
 > sudo systemctl stop hostapd
@@ -330,7 +332,58 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >>
 >> ...
 
-https://wikidocs.net/78532
+reference: https://wikidocs.net/78532
+
+## 9. RIP Routing Setting between mesh network and each AP server
+* Install quagga package:  network routing software for UNIX platforms, providing various routing protocols including OSPF, RIP, BGP, IS-IS, etc.
+> sudo apt install -y quagga
+* Set configurations for zebra, a core daemon of quagga
+
+The zebra daemon presents the Zserv API over a socket to Quagga clients. 
+
+The Zserv clients each implement certain routing protocols and communicate routing updates to zebra
+> sudo vi /etc/quagga/zebra.conf
+>>
+>> hostname Router
+>>
+>> password zebra
+>>
+>> enable password zebra
+>>
+>> debug zebra events
+>>
+>> debug zebra packet
+>>
+>> ip forwarding
+>>
+>> log file /var/log/quagga/zebra.log
+* Set configurations for ripd, a Zserv client for Routing Information Protocol (RIP)
+
+RIP: a distance-vector routing protocols which determines the optimal routing path by minimum number of hop counts
+> sudo vi /etc/quagga/ripd.conf
+>> hostname ripd
+>>
+>> password zebra
+>>
+>> debug rip events
+>>
+>> debug rip packet
+>>
+>> router rip
+>>
+>>  version 2
+>>
+>> ! Network address of AP server network
+>> 
+>> network 192.168.**N**.0/24
+>>
+>> ! Network address of CanSat mesh network
+>> 
+>> network 192.168.199.0/24
+>>
+>> log file /var/log/quagga/ripd.log
+
+
 
 * +Commands to check network connenction
 > ifconfig  &nbsp;&nbsp;&nbsp; #configure ip address, packets of each interfaces
