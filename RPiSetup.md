@@ -382,6 +382,10 @@ RIP: a distance-vector routing protocols which determines the optimal routing pa
 >> network 192.168.199.0/24
 >>
 >> log file /var/log/quagga/ripd.log
+* Restart quagga zebra, ripd daemon
+> sudo service zebra restart
+>
+> sudo service ripd restart
 
 
 
