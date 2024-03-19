@@ -141,7 +141,9 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer = MediaPlayer(libVlc)
 
         binding.buttonVideo.setOnClickListener {    //동영상 수신
-            if (pushedVideo % 2 == 1) {
+            if (pushedVideo % 2 == 1) {        
+                mediaPlayer.stop()        // EDITED
+                mediaPlayer.detachViews() // EDITED
                 pushedVideo += 1
             } else {
                 //resultLauncher.launch("video/*")
