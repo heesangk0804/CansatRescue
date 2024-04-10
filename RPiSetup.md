@@ -390,14 +390,14 @@ RIP: a distance-vector routing protocols which determines the optimal routing pa
 
 ## 10. PI thread management
 * Find currently running process in specific port(<PORTADDR>)
-> sudo lsof -i :<PORTADDR>
+> sudo lsof -i :**(PORTADDR)**
 >> (Result)
 >>
 >> COMMAND  PID       USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
 >>
 >> python3 1429 heesangkim   10u  IPv4  50816      0t0  TCP 192.168.1.1:webmin (LISTEN)
 * Manually kill currently running process with <PID>
-> kill -9 <PID>
+> kill -9 **(PID)**
 
 ## Appendix
 * +Commands to check network connenction
