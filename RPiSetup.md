@@ -160,6 +160,7 @@ i-(2). Block the wlan0 interface from Dymanic IP Allocation (DHCP) from network
 
 i-(3). Make gateway server to dynamically allocate IP to its clients
 > sudo apt install -y dnsmasq
+> 
 > sudo vi /etc/dnsmasq.conf
 >> interface=bat0
 >>
@@ -387,7 +388,16 @@ RIP: a distance-vector routing protocols which determines the optimal routing pa
 >
 > sudo service ripd restart
 
-
+## 10. PI thread management
+* Find currently running process in specific port(<PORTADDR>)
+> sudo lsof -i :<PORTADDR>
+>> (Result)
+>>
+>> COMMAND  PID       USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+>>
+>> python3 1429 heesangkim   10u  IPv4  50816      0t0  TCP 192.168.1.1:webmin (LISTEN)
+* Manually kill currently running process with <PID>
+> kill -9 <PID>
 
 * +Commands to check network connenction
 > ifconfig  &nbsp;&nbsp;&nbsp; #configure ip address, packets of each interfaces
