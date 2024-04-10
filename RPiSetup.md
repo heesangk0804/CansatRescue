@@ -399,6 +399,7 @@ RIP: a distance-vector routing protocols which determines the optimal routing pa
 * Manually kill currently running process with <PID>
 > kill -9 <PID>
 
+## Appendix
 * +Commands to check network connenction
 > ifconfig  &nbsp;&nbsp;&nbsp; #configure ip address, packets of each interfaces
 >
