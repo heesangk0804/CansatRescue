@@ -247,7 +247,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 
 ## 8. Setup for Each Node to Create Wireless Access Point Server
 * Install hostapd package: Daemon for controlling Wi-Fi AP server
-? sudo apt install -y hostapd 
+> sudo apt install -y hostapd 
 >
 > sudo systemctl unmask hostapd
 >
