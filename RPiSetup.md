@@ -141,11 +141,11 @@ reference: https://github.com/binnes/WiFiMeshRaspberryPi/blob/master/part1/READM
 
 * i. WLAN Interface Settings
 
-i-(1). Change the wlan0 interface mode into Ad-Hoc
-> sudo vi /etc/network/interfaces.d/wlan0
->> auto wlan0
+i-(1). Change the wlan2 interface mode into Ad-Hoc
+> sudo vi /etc/network/interfaces.d/wlan2
+>> auto wlan2
 >> 
->> iface wlan0 inet manual
+>> iface wlan2 inet manual
 >> 
 >> &nbsp;&nbsp;&nbsp; wireless-channel 1	&nbsp;&nbsp;&nbsp;	#channel num among 2.4G band
 >>
@@ -153,8 +153,8 @@ i-(1). Change the wlan0 interface mode into Ad-Hoc
 >>
 >> &nbsp;&nbsp;&nbsp; wireless-mode ad-hoc &nbsp;&nbsp;&nbsp; #set as ad-hoc
 
-i-(2). Block the wlan0 interface from Dymanic IP Allocation (DHCP) from network 
-> echo 'denyinterfaces wlan0' | sudo tee --append /etc/dhcpcd.conf
+i-(2). Block the wlan2 interface from Dymanic IP Allocation (DHCP) from network 
+> echo 'denyinterfaces wlan2' | sudo tee --append /etc/dhcpcd.conf
 
 < Additional Settings for Gateway >
 
@@ -184,7 +184,7 @@ iii-(1). Write shell script file to run mesh network (node client version)
 >>
 >> #batman-adv interface to use
 >>
->> sudo batctl if add wlan0
+>> sudo batctl if add wlan2
 >>
 >> sudo ifconfig bat0 mtu 1468
 >>
@@ -194,7 +194,11 @@ iii-(1). Write shell script file to run mesh network (node client version)
 >>
 >> #Activates batman-adv interfaces
 >>
->> sudo ifconfig wlan0 up
+>> #In case of wlan0 distraction:disable wlan0(on-chip broadcom)
+>> 
+>> #sudo ifconfig wlan0 down
+>> 
+>> sudo ifconfig wlan2 up
 >>
 >> sudo ifconfig bat0 up
 >>
@@ -206,7 +210,7 @@ iii-(1). Write shell script file to run mesh network (gateway version)
 >>
 >> #batman-adv interface to use
 >>
->> sudo batctl if add wlan0
+>> sudo batctl if add wlan2
 >>
 >> sudo ifconfig bat0 mtu 1468
 >>
@@ -226,11 +230,15 @@ iii-(1). Write shell script file to run mesh network (gateway version)
 >>
 >> #Activates batman-adv interfaces
 >>
->> sudo ifconfig wlan0 up
+>> #In case of wlan0 distraction:disable wlan0(on-chip broadcom)
+>> 
+>> #sudo ifconfig wlan0 down
+>>
+>> sudo ifconfig wlan2 up
 >>
 >> sudo ifconfig bat0 up
 >>
->> sudo ifconfig bat0 192.168.199.1/24
+>> sudo ifconfig bat0 192.168.199.**N**/24
 
 
 iii-(2). Make the file executable, then let it run every time the system boots
@@ -261,7 +269,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 > sudo systemctl stop dnsmasq
 * Edit dhcpcd configuration file
 > sudo vi /etc/dhcpcd.conf
->> interface wlan0
+>> interface wlan1
 >>
 >> static ip_address=192.168.**(SatNum)**.1/24
 >>
@@ -270,7 +278,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 > sudo service dhcpcd restart
 * Edit dnsmasq configuration file to set DHCP allocation
 > sudo vi /etc/dnsmasq.conf
->> interface=wlan0
+>> interface=wlan1
 >>
 >> dhcp-range=192.168.2.2,192.168.2.20,255.255.255.0,24h
 * Edit hostapd configuration file for WiFi AP Server basic settings:
