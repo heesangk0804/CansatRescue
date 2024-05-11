@@ -250,6 +250,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 >> /home/**USERNAME**/start-batman-adv.sh &
 >>
 >> ...
+>> exit 0
 >
 > sudo reboot
 
