@@ -437,5 +437,7 @@ RIP: a distance-vector routing protocols which determines the optimal routing pa
 >>
 >> sudo snap install -y nmap
 >
-> ssh **(host ID)**@**(IP Address)**  #remote access to another device in network, through shell script 
+> ssh **(host ID)**@**(IP Address)**  #remote access to another device in network, through shell script
+>
+> sudo ifconfig wlan**N** down  # disable certain wlan interface temporarily 
 
