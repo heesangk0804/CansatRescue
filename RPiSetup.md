@@ -439,5 +439,10 @@ RIP: a distance-vector routing protocols which determines the optimal routing pa
 >
 > ssh **(host ID)**@**(IP Address)**  #remote access to another device in network, through shell script
 >
-> sudo ifconfig wlan**N** down  # disable certain wlan interface temporarily 
+> sudo ifconfig wlan**N** down  # disable certain wlan interface temporarily
+>
+> lsusb #list of usb devices
+>
+> lsof #list of currently open files
+
 
