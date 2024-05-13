@@ -442,6 +442,8 @@ RIP: a distance-vector routing protocols which determines the optimal routing pa
 > sudo ifconfig wlan**N** down  # disable certain wlan interface temporarily
 >
 > lsusb #list of usb devices
+> 
+> lsmod #list of kernel modules loaded in memory
 >
 > lsof #list of currently open files
 
