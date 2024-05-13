@@ -1,6 +1,11 @@
 package com.example.myapplication
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +15,7 @@ import android.os.Looper
 import android.os.Message
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import com.example.myapplication.databinding.ActivityMainBinding
 import org.json.JSONArray
 import org.json.JSONException
@@ -37,16 +43,19 @@ class MainActivity : AppCompatActivity() {
         lateinit var writeSocket: DataOutputStream
         lateinit var readSocket: DataInputStream
         lateinit var cManager: ConnectivityManager
+        lateinit var lManager: LocationManager
         lateinit var myIp: String
         private lateinit var libVlc: LibVLC
         private lateinit var mediaPlayer: MediaPlayer
         private lateinit var videoLayout: VLCVideoLayout
 
-        var ip = "192.168.0.82"
+        var ip = "192.168.1.1"
         var port = 10000
         //var mHandler = Handler()      //-> API30부터 Deprecated됨. Looper를 직접 명시해야함
         var mHandler = Handler(Looper.getMainLooper())
         var serverClosed = true
+        var latitude = 0.0
+        var longitude = 0.0
     }
 
     /*
@@ -56,10 +65,10 @@ class MainActivity : AppCompatActivity() {
     */
 
     // 버튼이 눌렸는지 확인
-    private var pushedSensor = 0
-    private var pushedHelp = 0
-    private var pushedVideo = 0
-
+    private var pushedSensor = false
+    private var groundreply = false
+    private var pushedVideo = false
+     
     // 앱이 시작할 때 한 번 수행되어야 할 작업들 (setup)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +84,66 @@ class MainActivity : AppCompatActivity() {
         cManager =
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         socket.close() // close socket
+
+        val gpsListener: LocationListener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {	// 위치 변경 시 자동 호출
+                latitude = location.latitude
+                longitude = location.longitude
+                val msg = mHandler.obtainMessage()
+                msg.what = 8
+                msg.obj = "GPS"
+                mHandler.sendMessage(msg)
+            }
+            override fun onProviderDisabled(provider: String) {		// Provider 이용 불가 시 자동 호출
+                super.onProviderDisabled(provider)
+            }
+            override fun onProviderEnabled(provider: String) {		// Provider 다시 이용 가능 시 자동 호출
+                super.onProviderEnabled(provider)
+            }
+        }
+
+
+        val networkListener: LocationListener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {	// 위치 변경 시 자동 호출
+                latitude = location.latitude
+                longitude = location.longitude
+                val msg = mHandler.obtainMessage()
+                msg.what = 8
+                msg.obj = "Network"
+                mHandler.sendMessage(msg)
+            }
+            override fun onProviderDisabled(provider: String) {		// Provider 이용 불가 시 자동 호출
+                super.onProviderDisabled(provider)
+            }
+            override fun onProviderEnabled(provider: String) {		// Provider 다시 이용 가능 시 자동 호출
+                super.onProviderEnabled(provider)
+            }
+        }
+
+        lManager = applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100
+            )
+            return
+        }
+        lManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10_000L, 10f, gpsListener)
+        lManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10_000L, 10f, networkListener)
 
         binding.buttonConnect.setOnClickListener {  //클라이언트 -> 서버 접속
             if(binding.etIp.text.isNotEmpty()) {
@@ -94,9 +163,8 @@ class MainActivity : AppCompatActivity() {
         binding.buttonDisconnect.setOnClickListener {  //클라이언트 -> 서버 접속 끊기
             if(!socket.isClosed) {
                 Disconnect().start()
-                pushedSensor = 0
-                pushedHelp = 0
-                pushedVideo = 0
+                pushedSensor = false
+                pushedVideo = false
             }
             else toastShort("서버와 연결이 되어있지 않습니다.")
         }
@@ -114,26 +182,25 @@ class MainActivity : AppCompatActivity() {
         binding.buttonSensor.setOnClickListener {    //센서 정보 수신
             if(socket.isClosed) {
                 toastShort("연결이 되어있지 않습니다.")
-            } else if (pushedSensor % 2 == 1) {
+            } else if (pushedSensor) {
                 val mThread = SensorMessage(true)
                 mThread.start()
-                pushedSensor += 1
+                pushedSensor = false
             } else {
                 val mThread = SensorMessage()
                 mThread.start()
-                pushedSensor += 1
+                pushedSensor = true
             }
         }
 
         binding.buttonHelp.setOnClickListener {    //구조요청 (긴급메시지)
             if(socket.isClosed) {
                 toastShort("연결이 되어있지 않습니다.")
-            } else if (pushedHelp % 2 == 1) {
-                toastShort("이미 구조요청을 전송했습니다.")
+            } else if (groundreply) {
+                toastShort("구조요청이 지상국에 전송되었습니다.")
             } else {
                 val mThread = HelpMessage()
                 mThread.start()
-                pushedHelp += 1
             }
         }
 
@@ -141,17 +208,17 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer = MediaPlayer(libVlc)
 
         binding.buttonVideo.setOnClickListener {    //동영상 수신
-            if (pushedVideo % 2 == 1) {        
+            if (pushedVideo) {
                 mediaPlayer.stop()        // EDITED
                 mediaPlayer.detachViews() // EDITED
-                pushedVideo += 1
+                pushedVideo = false
             } else {
                 //resultLauncher.launch("video/*")
                 var url: String = "rtsp://192.168.0.78:8080/"
                 if (binding.etIp.text.isNotEmpty())
                     url = "rtsp://" + binding.etIp.text.toString() + ":8080/"
                 playVideo(url)
-                pushedVideo += 1
+                pushedVideo = true
             }
         }
 
@@ -160,7 +227,7 @@ class MainActivity : AppCompatActivity() {
                 super.handleMessage(msg)
                 when(msg.what){
                     1-> toastShort("IP 주소가 잘못되었거나 서버의 포트가 개방되지 않았습니다.")
-                    2->((binding.textStatus.text as String) + (msg.obj as String) + "\n").also { binding.textStatus.text = it }
+                    2-> ((binding.textStatus.text as String) + (msg.obj as String) + "\n").also { binding.textStatus.text = it }
                     3-> toastShort("서버에 접속하였습니다.")
                     4-> toastShort("메시지 전송에 실패하였습니다.")
                     5-> toastLong("인터넷이 연결되지 않았습니다. 연결 후 다시 시도하세요.")
@@ -169,13 +236,27 @@ class MainActivity : AppCompatActivity() {
                         myIp = msg.obj as String
                     }
                     7->{
-                        val msg = JSONObject(msg.obj as String)
-                        val obj: JSONObject = msg.getJSONObject("msg")
-                        val gps: JSONArray = obj.getJSONArray("gps")
-                        val lat = gps[0]
-                        val lon = gps[1]
-                        binding.sensorView.setText("Sat: GPS: [$lat, $lon]")
+                        //binding.sensorView.setText("Sent to 7:" + (msg.obj as String))
+
+                        try{
+                            val msg = JSONObject(msg.obj.toString())
+                            val obj: JSONObject = msg.getJSONObject("sensor")
+                            val gps: JSONObject = obj.getJSONObject("gps")
+                            val lat = gps.getDouble("lat")
+                            val lon = gps.getDouble("lon")
+                            binding.sensorView.setText("Sat: GPS: [$lat, $lon]")
+                        } catch (e: JSONException) {}
+
+                        try {
+                            //binding.sensorView.setText(msg.obj as String)
+                            val msg = JSONObject(msg.obj as String)
+                            val obj: JSONObject = msg.getJSONObject("msg")
+                            val note: String = obj.getString("note")
+                            binding.sensorView.setText("* SOS received from ground *\n$note")
+                            groundreply = true
+                        } catch (e: JSONException) {}
                     }
+                    8->binding.gpsView.setText((msg.obj as String) + "[$latitude, $longitude]")
                 }
             }
         }
@@ -203,14 +284,12 @@ class MainActivity : AppCompatActivity() {
                         val input = bac.toString()
                         val recvInput = input.trim()
                         val msg = mHandler.obtainMessage()
-                        if (recvInput[0] == '{') {
-                            msg.what = 7
-                        } else {
+                        /*if (recvInput[0] == '{') {
                             msg.what = 2
-                        }
+                        } else {*/
+                        msg.what = 7
                         msg.obj = "$recvInput"
                         mHandler.sendMessage(msg)
-
                     }
                 }
             } catch (e: Exception) {    //연결 실패
@@ -264,16 +343,10 @@ class MainActivity : AppCompatActivity() {
         fun setJSON():JSONObject {
             val obj = JSONObject()
             val msgobj = JSONObject()
-            val jsonarray = JSONArray()
-            val gps = listOf(35.0, 129.0) // gps coordinate of mobile
             try{
                 msgobj.put("sender","mobile")
                 msgobj.put("receiver","rpi1")
                 msgobj.put("sensor",(if(stopflag) "false" else "true"))
-                for (i in 0 until gps.size) {
-                    jsonarray.put(gps.get(i))
-                }
-                msgobj.put("gps", jsonarray)
                 obj.put("msg",msgobj)
 
             } catch(e: JSONException) {
@@ -295,21 +368,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     //긴급메시지 전송 (GPS 정보 포함)
-    class HelpMessage(var stopflag: Boolean = false):Thread(){
+    inner class HelpMessage(var stopflag: Boolean = false):Thread(){
         private lateinit var msg:String
 
         fun setJSON():JSONObject {
             val obj = JSONObject()
             val msgobj = JSONObject()
-            val jsonarray = JSONArray()
-            val gps = listOf(35.0, 129.0) // gps coordinate of mobile
+            val jsonarray = JSONObject()
             try{
                 msgobj.put("sender","mobile")
                 msgobj.put("receiver","rpi1")
                 msgobj.put("help","true")
-                for (i in 0 until gps.size) {
-                    jsonarray.put(gps.get(i))
-                }
+                jsonarray.put("lat", latitude)
+                jsonarray.put("lon", longitude)
                 msgobj.put("gps", jsonarray)
                 obj.put("msg",msgobj)
 
