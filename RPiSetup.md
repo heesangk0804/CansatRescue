@@ -142,10 +142,10 @@ reference: https://github.com/binnes/WiFiMeshRaspberryPi/blob/master/part1/READM
 * i. WLAN Interface Settings
 
 i-(1). Change the wlan2 interface mode into Ad-Hoc
-> sudo vi /etc/network/interfaces.d/wlan2
->> auto wlan2
+> sudo vi /etc/network/interfaces.d/wlan1
+>> auto wlan1
 >> 
->> iface wlan2 inet manual
+>> iface wlan1 inet manual
 >> 
 >> &nbsp;&nbsp;&nbsp; wireless-channel 1	&nbsp;&nbsp;&nbsp;	#channel num among 2.4G band
 >>
@@ -153,8 +153,8 @@ i-(1). Change the wlan2 interface mode into Ad-Hoc
 >>
 >> &nbsp;&nbsp;&nbsp; wireless-mode ad-hoc &nbsp;&nbsp;&nbsp; #set as ad-hoc
 
-i-(2). Block the wlan2 interface from Dymanic IP Allocation (DHCP) from network 
-> echo 'denyinterfaces wlan2' | sudo tee --append /etc/dhcpcd.conf
+i-(2). Block the wlan1 interface from Dymanic IP Allocation (DHCP) from network 
+> echo 'denyinterfaces wlan1' | sudo tee --append /etc/dhcpcd.conf
 
 < Additional Settings for Gateway >
 
@@ -184,7 +184,7 @@ iii-(1). Write shell script file to run mesh network (node client version)
 >>
 >> #batman-adv interface to use
 >>
->> sudo batctl if add wlan2
+>> sudo batctl if add wlan1
 >>
 >> sudo ifconfig bat0 mtu 1468
 >>
@@ -198,7 +198,7 @@ iii-(1). Write shell script file to run mesh network (node client version)
 >> 
 >> #sudo ifconfig wlan0 down
 >> 
->> sudo ifconfig wlan2 up
+>> sudo ifconfig wlan1 up
 >>
 >> sudo ifconfig bat0 up
 >>
@@ -210,7 +210,7 @@ iii-(1). Write shell script file to run mesh network (gateway version)
 >>
 >> #batman-adv interface to use
 >>
->> sudo batctl if add wlan2
+>> sudo batctl if add wlan1
 >>
 >> sudo ifconfig bat0 mtu 1468
 >>
@@ -222,11 +222,11 @@ iii-(1). Write shell script file to run mesh network (gateway version)
 >>
 >> sudo sysctl -w net.ipv4.ip_forward=1
 >>
->> sudo iptables -t nat -A POSTROUTING -o wlan1 -j MASQUERADE
+>> sudo iptables -t nat -A POSTROUTING -o wlan2 -j MASQUERADE
 >>
->> sudo iptables -A FORWARD -i wlan1 -o bat0 -m conntrack –ctstate RELATED,ESTABLISHED -j ACCEPT
+>> sudo iptables -A FORWARD -i wlan2 -o bat0 -m conntrack –ctstate RELATED,ESTABLISHED -j ACCEPT
 >>
->> sudo iptables -A FORWARD -i bat0 -o wlan1 -j ACCEPT
+>> sudo iptables -A FORWARD -i bat0 -o wlan2 -j ACCEPT
 >>
 >> #Activates batman-adv interfaces
 >>
@@ -234,7 +234,7 @@ iii-(1). Write shell script file to run mesh network (gateway version)
 >> 
 >> #sudo ifconfig wlan0 down
 >>
->> sudo ifconfig wlan2 up
+>> sudo ifconfig wlan1 up
 >>
 >> sudo ifconfig bat0 up
 >>
@@ -270,7 +270,7 @@ iii-(2). Make the file executable, then let it run every time the system boots
 > sudo systemctl stop dnsmasq
 * Edit dhcpcd configuration file
 > sudo vi /etc/dhcpcd.conf
->> interface wlan1
+>> interface wlan2
 >>
 >> static ip_address=192.168.**(SatNum)**.1/24
 >>
@@ -279,12 +279,12 @@ iii-(2). Make the file executable, then let it run every time the system boots
 > sudo service dhcpcd restart
 * Edit dnsmasq configuration file to set DHCP allocation
 > sudo vi /etc/dnsmasq.conf
->> interface=wlan1
+>> interface=wlan2
 >>
 >> dhcp-range=192.168.2.2,192.168.2.20,255.255.255.0,24h
 * Edit hostapd configuration file for WiFi AP Server basic settings:
 > sudo vi /etc/hostapd/hostapd.conf
->> interface=wlan1
+>> interface=wlan2
 >>
 >> driver=nl80211
 >>
