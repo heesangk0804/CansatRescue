@@ -24,7 +24,7 @@
 > sudo vi /etc/dphys-swapfile
 >> ...
 >>
->> CONF_SWAPFILE=/home/pi &nbsp;&nbsp;&nbsp; #location of swap file
+>> CONF_SWAPFILE=/home/pi/ &nbsp;&nbsp;&nbsp; #location of swap file
 >> 
 >> CONF_SWAPSIZE=2048 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #size of swap
 >>
