@@ -61,7 +61,7 @@ neighbor_list_temp = [] #[0]: wlan1_MAC, [1]: last seen time, [2]: list of bat0_
 apclient_list_temp = []
 
 #HOST = '127.0.0.1'
-BASEHOST = '192.168.2.2'  #'192.168.1.53'
+BASEHOST = '192.168.1.2'  #'192.168.1.53'
 BASEPORT = 2500
 BASEADDR = (BASEHOST, BASEPORT)
 APNETWORK = '192.168.'+str(sat_num)
@@ -71,7 +71,6 @@ BUFSIZE = 1024
 ADDR = (HOST, PORT)
 
 checkbaseconn = 0
-checkhelpreq = 0
 clientSocket_list = []
 onlyclientSocket_list = []
 clithr_event_list = []
@@ -102,6 +101,7 @@ help_info_obj = {
     "text": None,    
     "refugee": None    
 }
+
 def initIMU(devaddr):
     bus.write_byte_data(devaddr, SMPLRT_DIV, 7)     #Write to sample rate reg
     bus.write_byte_data(devaddr, PWR_MGMT_1, 1)     #Write to power management register
@@ -182,7 +182,6 @@ def findNBCLhosts():
     sl = ifconfig_str.readline()  
     checkselfwlan = re.match('wlan1', sl.strip())
     if checkselfwlan: 
-        print("wlan1 active on Cansat0"+str(sat_num))
         break
     if sl == '' :
         print("no wlan1 active on Cansat0"+str(sat_num))
@@ -238,7 +237,7 @@ def findNBCLhosts():
 
 def socket_send_json(clientSocket, obj):
     for key in obj.keys():
-        if key == "sensor": break
+        if key == "sensor" or key == "neighbor" or key == "client": break
         print(key, ":", obj[key])
     for key in obj.keys():
         if key == "msg" :  receiver = obj[key]["receiver"]
@@ -247,11 +246,13 @@ def socket_send_json(clientSocket, obj):
     peeraddr = clientSocket.getpeername()
     data = json.dumps(obj)
     l = len(data)
-    print(infotype + " obj data of length " + str(l) + " to be sent to " + receiver + ' at ' + str(peeraddr))
+    if "sensor" not in obj and "neighbor" not in obj and "client" not in obj:
+        print(infotype + " obj data of length " + str(l) + " to be sent to " + receiver + ' at ' + str(peeraddr))
     try: 
         sendreturn = clientSocket.send(l.to_bytes(2, byteorder='big') + data.encode())
         #print(sendreturn)
-        print("Data sent to " + receiver + ' successfully at ' + str(peeraddr))
+        if "sensor" not in obj and "neighbor" not in obj and "client" not in obj:
+            print("Data sent to " + receiver + ' successfully at ' + str(peeraddr))
     except:
         print("Failure to send data to " + receiver + ' at ' + str(peeraddr))
 
@@ -370,7 +371,6 @@ def sensor_thread(clientSocket):
 def help_thread(obj_help_recv, clientSocket):
     count = 0
     global checkbaseconn
-    global checkhelpreq
     global apclient_list
     apclient_list_config = copy.deepcopy(apclient_list)
     helprefug_ip = clientSocket.getpeername()[0]
@@ -387,127 +387,133 @@ def help_thread(obj_help_recv, clientSocket):
     except Exception as e:
         print('Exception at help_thread; refugee %s:%s / base %s:%s ' %clientSocket.getpeername() %BASEADDR)
         return    
+    try:
+        print("help message from mobile: ", str(obj_help_recv))
+        '''for clithr_event in clithr_event_list:
+            #print(clithr_event)
+            if clithr_event["client"] == clientSocket:
+                event_help = clithr_event["help_event"]
+        if event_help.is_set():
+            print
+            return
+        '''
+        obj_help_send['help'] = copy.deepcopy(obj_help_recv['help'])
+        print("help_send: ", obj_help_send, "help_recv: ", obj_help_recv)
+        if ('type' in obj_help_recv['help']) and (obj_help_recv['help']['type'] == 'help') :
+            #append GPS of refugee
+            if obj_help_recv['help']['refugee']['gps']['lat'] != "" and obj_help_recv['help']['refugee']['gps']['lon'] != "":   
+                print("GPS data of refugee exists in help msg from refugee")
+            else :   
+                print("NO gps data from mobile: sending CanSat's GPS")            
+                lat, lon, alt = parseGPS(uart)
+                obj_help_send['help']['refugee']['gps'] = { "lat": lat, "lon": lon}
+            #append MAC of refugee  
+            for refugee in apclient_list_config:
+                if refugee[1] == helprefug_ip:
+                    print("found the same IP")
+                    obj_help_send['help']['refugee']['MAC'] = refugee[0]
+            if not ('MAC' in obj_help_send['help']['refugee']):
+                print("No refugee IP matched")
+        else : 
+            print("Help msg type not help")
+            return
         
-    checkhelpreq = 1
-    print("help message from mobile: ", str(obj_help_recv))
-    for clithr_event in clithr_event_list:
-        #print(clithr_event)
-        if clithr_event["client"] == clientSocket:
-            event_help = clithr_event["help_event"]
-    if event_help.is_set():
-        lock.acquire()
-        checkhelpreq = 0
-        lock.release()
-        return
+        print("current base connection: ", checkbaseconn)
+        if not checkbaseconn:
+            obj_help_send['msg']['receiver'] = obj_dispatch_send["msg"]["receiver"]
+            obj_help_send['help']['text'] = "Connection with the base station is lost: Please wait a while and try again."
+            print(obj_help_send)
+            #socket_send_json(clientSocket, obj_help_recv)
+            return
+        
+        socket_send_json(baseclientSocket, obj_help_send)
+        
+        data_dispatch = baseclientSocket.recv(BUFSIZE)
+        print("dispatch message from base: ", str(data_dispatch))
+        obj_dispatch_recv = json.loads(data_dispatch[2:])
 
-    obj_help_send['help'] = copy.deepcopy(obj_help_recv['help'])
-    print("help_send: ", obj_help_send, "help_recv: ", obj_help_recv)
-    if ('type' in obj_help_recv['help']) and (obj_help_recv['help']['type'] == 'help') :
-        #append GPS of refugee
-        if obj_help_recv['help']['refugee']['gps']['lat'] != "" and obj_help_recv['help']['refugee']['gps']['lon'] != "":   
-            print("GPS data of refugee exists in help msg from refugee")
-        else :   
-            print("NO gps data from mobile: sending CanSat's GPS")            
-            lat, lon, alt = parseGPS(uart)
-            obj_help_send['help']['refugee']['gps'] = { "lat": lat, "lon": lon}
-        #append MAC of refugee  
-        for refugee in apclient_list_config:
-            if refugee[1] == helprefug_ip:
-                print("found the same IP")
-                obj_help_send['help']['refugee']['MAC'] = refugee[0]
-        if not ('MAC' in obj_help_send['help']['refugee']):
-            print("No refugee IP matched")
-    else : 
-        print("Help msg type not help")
-        lock.acquire()
-        checkhelpreq = 0
-        lock.release()
-        return
-    
-    print("current base connection: ", checkbaseconn)
-    if not checkbaseconn:
-        obj_help_send['msg']['receiver'] = obj_dispatch_send["msg"]["receiver"]
-        obj_help_send['help']['text'] = "Connection with the base station is lost: Please wait a while and try again."
-        print(obj_help_send)
-        #socket_send_json(clientSocket, obj_help_recv)
-        return
-    
-    socket_send_json(baseclientSocket, obj_help_send)
-    
-    data_dispatch = baseclientSocket.recv(BUFSIZE)
-    print("dispatch message from base: ", str(data_dispatch))
-    obj_dispatch_recv = json.loads(data_dispatch[2:])
-    
-    obj_dispatch_send["msg"]["time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-    obj_dispatch_send['help'] = obj_dispatch_recv['help']
-    if 'type' in obj_dispatch_recv['help'] and obj_dispatch_recv['help']['type'] == 'dispatch' :
-        print("Proper dispatch type message from base")
-    else : 
-        print("Help msg type not dispatch")
-        lock.acquire()
-        checkhelpreq = 0
-        lock.release()
-        return
-    
-    socket_send_json(clientSocket, obj_dispatch_send)    
-
-    count += 1
-    checkhelpreq = 0
-    time.sleep(1)
-    #print("Done")
-                    
-def autohelp_thread():
+    except Exception as e:
+        print('Exception at help_thread; refugee %s:%s / base %s:%s ' %clientSocket.getpeername() %BASEADDR)
+        return    
+                              
+def baserecv_thread():
     count = 0
-    global autohelp_active
-    global autohelp_mode
+    global baserecv_active
+    global onlyclientSocket_list
+    global apclient_list
     global checkbaseconn
-    global checkhelpreq
+    try:
+        obj_help_send = copy.deepcopy(default_msg_obj)
+        if baseclientSocket.getpeername()[0] != BASEADDR[0]: Exception    
+    except Exception as e:
+        print('Exception at baserecv_thread; base %s:%s ' %BASEADDR)
+        lock.acquire()
+        baserecv_active = 0
+        lock.release()
+        return
+    
     try:
         while True:
             time.sleep(1)
             lock.acquire()
-            autohelp_active = 1
+            baserecv_active = 1
             lock.release()
-            print("============checkhelpreq: ", checkhelpreq, " autohelp running==================")
-            if checkhelpreq : 
-                print("checkhelp set to ", checkhelpreq)
-                continue        
-            data_autohelp = baseclientSocket.recv(BUFSIZE)
-            print(data_autohelp)
-            obj_autohelp_recv = json.loads(data_autohelp[2:])
-            print("recv done")
-            if obj_autohelp_recv['msg']['sender'] == 'Base' and obj_autohelp_recv['msg']['receiver'] == default_msg_obj["msg"]["sender"] :
-                print("Proper msg syntax of autohelp msg from base")
-                print(obj_autohelp_recv)
-            else:     
-                print("Improper msg syntax of autohelp msg from base")
+            
+
+            baserecv_data = baseclientSocket.recv(BUFSIZE)
+            print("+++++++++++++++++++++base message received!+++++++++++++++++++++")
+            length = int.from_bytes(baserecv_data[:2], 'big')
+            #print(str(cur_clientSocket))
+            print("from base: " + str(baserecv_data[2:]) + ' len='+str(length))
+            # Check packet message syntax
+            if baserecv_data[2] != 123: # b'{':
+                print("Improper json syntax from base")
+                continue
+            obj_base_recv = json.loads(baserecv_data[2:])
+            print("received data=" + str(obj_base_recv) + "length=%d" % len(str(obj_base_recv)))
+        
+            if obj_base_recv['msg']['sender'] != 'Base' or obj_base_recv['msg']['receiver'] != obj_help_send["msg"]["sender"] :
+                print("Improper msg syntax from base")
+                continue
+            elif 'help' not in obj_base_recv or 'type' not in obj_base_recv['help']:
+                print("Not a help message from base")
                 continue
             
-            obj_autohelp_send = copy.deepcopy(default_msg_obj)
-            
-            if obj_autohelp_recv.get('help') and obj_autohelp_recv['help'].get('type') and obj_autohelp_recv['help']['type'] == 'auto':
-                obj_autohelp_send["help"] = obj_autohelp_recv["help"]        
-                
+            obj_help_send['help'] = obj_base_recv['help']
+            if obj_base_recv['help']['type'] == 'auto':
                 if onlyclientSocket_list:
-                    print("clientSocket list not empty", onlyclientSocket_list)
+                    print("clientSocket list not empty")
                     for clientSocket in onlyclientSocket_list:
+                        print(clientSocket)
                         ip_num = clientSocket.getpeername()[0].split(".")
-                        #re.split(".", clientSocket.getpeername()[0])
-                        obj_autohelp_send["msg"]["receiver"] = 'Mobile' + ip_num[2] + '_' + ip_num[3]
-                        obj_autohelp_send["msg"]["time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-
-                        socket_send_json(clientSocket, obj_autohelp_send)  
+                        obj_help_send["msg"]["receiver"] = 'Mobile' + ip_num[2] + '_' + ip_num[3]
+                        obj_help_send["msg"]["time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                        socket_send_json(clientSocket, obj_help_send)
                 else:
                     print("No refugee client in list")
                     continue
-
+                
+            elif obj_base_recv['help']['type'] == 'dispatch':
+                for clientSocket in onlyclientSocket_list:
+                    for apclient in apclient_list:
+                        if obj_base_recv['help']['refugee']['MAC'] == apclient[0] and clientSocket.getpeername()[0] == apclient[1] :
+                            ip_num = clientSocket.getpeername()[0].split(".")
+                            #re.split(".", clientSocket.getpeername()[0])
+                            obj_help_send["msg"]["receiver"] = 'Mobile' + ip_num[2] + '_' + ip_num[3]
+                            obj_help_send["msg"]["time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                            socket_send_json(clientSocket, obj_help_send)
+                            print("send done at baserecv thread")
+                print("checkpoint at baserecv")
+                print(obj_help_send['msg']['receiver'])
+                if obj_help_send['msg']['receiver'] == "None":
+                    print("Refugee waiting for dispatch is lost")        
             else:
-                print("Not autohelp message from base")
+                print("Not a help message from base")
                 continue
     except Exception as e:
-        print('Exception at autohelp_thread; base %s:%s ' %BASEADDR)
+        print('Exception at baserecv_thread; base %s:%s ' %BASEADDR)
         lock.acquire()
-        autohelp_active = 0
+        baserecv_active = 0
         lock.release()
         return
 
@@ -546,7 +552,7 @@ if __name__ == '__main__':
     serverSocket.listen(100)
     clientSocket_list.append(serverSocket)  #list of client sockets to be saved
     meshinfo_active = 0
-    autohelp_active = 0
+    baserecv_active = 0
 
     #Test: use gethost, remotenetwork 
     host_name = socket.gethostname()
@@ -560,8 +566,6 @@ if __name__ == '__main__':
     while True:
         if not checkbaseconn:
             try:
-                baseclientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                baseclientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  
                 print(baseclientSocket)
                 baseclientSocket.connect(BASEADDR)
                 print(baseclientSocket)
@@ -575,14 +579,14 @@ if __name__ == '__main__':
         if checkbaseconn and not meshinfo_active: 
             thread_meshinfo = threading.Thread(target=meshinfo_thread, args=())
             thread_meshinfo.start()
-        if checkbaseconn and not autohelp_active: 
+        if checkbaseconn and not baserecv_active: 
             print("initial checkbaseconn: ", checkbaseconn)
-            thread_autohelp = threading.Thread(target=autohelp_thread,  args=())
+            thread_autohelp = threading.Thread(target=baserecv_thread,  args=())
             thread_autohelp.start()
         
         if whilecount % 10 == 0: 
             print("=================Current Threads Activated====================")
-            print("checkbaseconn: ", checkbaseconn,  "meshinfo_active: ", meshinfo_active, "autohelp_active: ", autohelp_active)
+            print("checkbaseconn: ", checkbaseconn,  "meshinfo_active: ", meshinfo_active, "autohelp_active: ", baserecv_active)
             print("whilecount: ", whilecount)
             for threadi in threading.enumerate():   print(threadi.name)
             print("==============================================================")
@@ -614,13 +618,6 @@ if __name__ == '__main__':
                 length = int.from_bytes(cur_data[:2], 'big')
                 #print(str(cur_clientSocket))
                 print("from mobile: " + str(cur_data[2:]) + ' len='+str(length))
-                #print('recv return datatype: ' + str(type(cur_data)))
-                #print all threads currently being executed
-                '''
-                print("=================Current Threads Activated====================")
-                for threadi in threading.enumerate():   print(threadi.name)
-                print("==============================================================")
-                '''
                 # Chcck packet message syntax
                 if cur_data[2] == 123: # b'{':
                     obj_cli_recv = json.loads(cur_data[2:])
@@ -661,5 +658,5 @@ if __name__ == '__main__':
                 # receive packet(=2byte_len + msg payload) from mobile.
         whilecount = whilecount + 1
     baseclientSocket.close()
-    clientSocket.close()
-    serverSocket.close()
+    for clientSocket in clientSocket_list:
+        clientSocket.close()
