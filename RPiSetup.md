@@ -47,7 +47,7 @@
 > sudo systemctl enable ssh
 * Enable realvnc after reboot 
 > sudo systemctl enable vncserver-x11-serviced.service
-* Install xrdp server & enable realvnc after reboot 
+* Install xrdp server & enable xrdp after reboot 
 > sudo apt install xrdp
 > sudo systemctl enable xrdp 
 
