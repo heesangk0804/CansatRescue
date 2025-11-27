@@ -43,6 +43,14 @@
 > /usr/src $ uname -r
 
 ## 4. Setup for Wifi Connection, LAN Card Drivers
+* Enable ssh after reboot 
+> sudo systemctl enable ssh
+* Enable realvnc after reboot 
+> sudo systemctl enable vncserver-x11-serviced.service
+* Install xrdp server & enable realvnc after reboot 
+> sudo apt install xrdp
+> sudo systemctl enable xrdp 
+
 * Fixed IP Settings for convenience in ssh remote access
 > netstat -nr
 > 
